@@ -21,8 +21,8 @@ WAIT_LOOP:
     CLR TF0            ; Clear TF0 flag
 
     RET                ; Return from the function
-    
-    
+
+
 ; Timer delay function for approximately 30 microseconds
 TIMER_DELAY30US:
     MOV TMOD, #01H      ; Set Timer 0 in mode 1 (16-bit mode with auto-reload)
@@ -40,24 +40,24 @@ WAIT_LOOP2:
     CLR TF0            ; Clear TF0 flag
 
     RET                ; Return from the function
-    
-    
+
+
     ; Microcontroller send request function
 REQUEST:
     CLR P1.0            ; DHT11 = 0 (set to low pin)
     CALL TIMER_DELAY20MS ; Wait for 20ms
     SETB P1.0            ; DHT11 = 1 (set to high pin)
 
-    RET                 ; Return from the function	
-    
-    
+    RET                 ; Return from the function
+
+
 ; Receive response from DHT11 function
 RESPONSE:
     JB P1.0,$  ; Wait while DHT11 is high
     JNB P1.0,$  ; Wait while DHT11 is low
     JB P1.0,$  ; Wait while DHT11 is high
 
-    RET 
+    RET
 
 
 Receive_data:
@@ -92,10 +92,10 @@ NextBit:
 
     MOV A, R2 ; Load c into the accumulator
     RET ; Return with the result in the accumulator
-    
-    
-BITCALL:    
-    
+
+
+BITCALL:
+
         SETB EA
     CALL Request ; Send start pulse
     CALL Response ; Receive response
@@ -112,7 +112,7 @@ BITCALL:
     ; Store next eight bits in I_Temp
     JB P1.0, $
     CALL Receive_data
-    
+
     MOV A, R3   ; Move the value of R3 to accumulator A
     ANL A, #01   ; Perform bitwise AND with 1 to check the least significant bit
     JZ Even      ; Jump to Even if the result is zero (LSB is 0)
@@ -147,29 +147,29 @@ Main:
 
 PWM:
 
-    MOV TMOD, #00010000B	;Run Timer 1 one 16-bit mode
+    MOV TMOD, #00010000B        ;Run Timer 1 one 16-bit mode
     SETB ET1
     SETB EA
-    
+
     CLR P1.1
 
     MOV TH1, #0FFH
     MOV TL1, #0FEH
 
-    SETB TR1		;Run timer	
+    SETB TR1            ;Run timer
 
     JMP $
 
 
 TIM1_ISR:
    CALL BITCALL
-   
-   
-   
-   
+
+
+
+
 
    MOV A, R5   ; Move the value of R5 to the accumulator A
-   CJNE A, #25, NotEqual   ; Compare A with the immediate value 25, jump to NotGreaterThan if not equal
+   CJNE A, #25, NotEqual   ; Compare A with the immediate value 25, jump to NotGreaterThan if not eq
    ; Code to execute if R5 is greater than 25
    CALL TIM1_ISR_LOW
    RETI
@@ -181,26 +181,26 @@ TIM1_ISR:
    ; Code to execute if R5 is not greater than 25
    CALL TIM1_ISR_HIGH
    RETI
-   
-    
-    
-    
-    
+
+
+
+
+
 TIM1_ISR_HIGH:
-	
-    CLR TR1		;STOP timer 1 from counting
-    CLR TF1		;CLEAR timer overflow flag
-	
+
+    CLR TR1             ;STOP timer 1 from counting
+    CLR TF1             ;CLEAR timer overflow flag
+
     ;JB P1.1, LOW_LEVEL
     MOV TH1, #0H
     MOV TL1, #0H
     SETB P1.1
 
-	
+
     SETB TR1
     RET
-	
-	
+
+
 ;LOW_LEVEL:
     ;MOV TH1, #0FEH
     ;MOV TL1, #32H
@@ -211,20 +211,20 @@ TIM1_ISR_HIGH:
     ;RET
 
 TIM1_ISR_LOW:
-	
-    CLR TR1		;STOP timer 1 from counting
-    CLR TF1		;CLEAR timer overflow flag
-	
+
+    CLR TR1             ;STOP timer 1 from counting
+    CLR TF1             ;CLEAR timer overflow flag
+
     JB P1.1, LOW_LEVEL2
     MOV TH1, #0FEH
     MOV TL1, #32H
     SETB P1.1
 
-	
+
     SETB TR1
     RET
-	
-	
+
+
 LOW_LEVEL2:
     MOV TH1, #00H
     MOV TL1, #99H
@@ -237,4 +237,3 @@ LOW_LEVEL2:
     ; End of program
     SJMP $
     END
-    
