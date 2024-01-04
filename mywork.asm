@@ -198,7 +198,7 @@ NextBit:
     
 BITCALL:    
     
-        SETB EA
+    SETB EA
     CALL Request ; Send start pulse
     CALL Response ; Receive response
 
